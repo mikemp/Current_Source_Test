@@ -7,6 +7,7 @@ Created on Oct 7, 2014
 '''
 
 import sys, SCPI, time
+import numpy as np
 from I2C import *
 from Digital_Potentiometer import *
 
@@ -14,6 +15,7 @@ from Digital_Potentiometer import *
 port = "/dev/tty.usbserial-A1017JW6"
 speed = 115200
 
+R_base = 200E3
 R1 = Digital_Potentiometer(0,0,0)
 R2 = Digital_Potentiometer(0,0,1)
 
@@ -21,11 +23,13 @@ totalSamples = "INF"
 sampleFreq = 100000
 
 freq    = SCPI.SCPI("192.168.2.1")
-voltage = SCPI.SCPI("192.168.2.2")
-current = SCPI.SCPI("192.168.2.3")
+resist_meter = SCPI.SCPI("192.168.2.2")
+# voltage = SCPI.SCPI("192.168.2.2")
+# current = SCPI.SCPI("192.168.2.3")
 
 
 ''' UTILITY FUNCTIONS '''
+
 
 def i2c_write_data(data, resp=True):
     error = 0
@@ -51,7 +55,26 @@ def i2c_write_data(data, resp=True):
 
 ''' MAIN PROGRAM '''
 if __name__ == '__main__':
-    ''' Set Up Bucks ajj'''
+    
+    
+    ''' Set up DMMs '''
+    # setup freq gen
+    freq.setSquare()
+    freq.setVoltage(0,3)
+    freq.setFrequency(sampleFreq)
+    
+    # setup resistance meter
+    resist_meter.setResistance("AUTO", "MAX")
+    resist_meter.setTriggerSource()
+    resist_meter.setTriggerCount(totalSamples)
+    resist_meter.setInitiate()
+    
+    time.sleep(1)
+    
+    freq.setOutput(1)
+
+    
+    ''' Set up bus pirate '''
     i2c = I2C(port, speed)
  
     print "Entering binmode: ",
@@ -84,12 +107,27 @@ if __name__ == '__main__':
         print "Failed to set I2C Speed."
         sys.exit()
     i2c.timeout(0.2)
-
+    
+    input("Press Enter to continue...")
+    
     ''' Experiment Code '''
-    
-    
+    print "Loop Through Pot Values"
+    for ii in range(0,256):
+        i2c_write_data(R1.I2C_set_value(ii))
+        r_meas = resist_meter.getMeasurements()
+        r_ideal = ii*R_base/255
+        if ii == 0:
+            r_data = np.array([[ii, r_ideal, r_meas]])
+        else:
+            r_data = np.append(r_data, [[ii, r_ideal, r_meas]], 0)
+        
+        print "[%03d %8.2f %8.2f]" % [ii, r_ideal, r_meas]
+        time.sleep(0.005) # sleep for 5ms
 
-    i2c_write_data(R1.I2C_set_value(20))
+    np.savetxt("Dig_pot_range_test.csv", r_data, delimiter=',')
+#     i2c_write_data(R1.I2C_set_value(20))
+
+#     input("Press Enter to continue...")
 
     print "Reset Bus Pirate to user terminal: "
     if i2c.resetBP():
@@ -97,3 +135,7 @@ if __name__ == '__main__':
     else:
         print "failed."
     sys.exit()
+    
+    
+    
+    
