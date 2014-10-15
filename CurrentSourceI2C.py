@@ -17,6 +17,13 @@ speed = 115200
 R1 = Digital_Potentiometer(0,0,0)
 R2 = Digital_Potentiometer(0,0,1)
 
+totalSamples = "INF"
+sampleFreq = 100000
+
+freq    = SCPI.SCPI("192.168.2.1")
+voltage = SCPI.SCPI("192.168.2.2")
+current = SCPI.SCPI("192.168.2.3")
+
 
 ''' UTILITY FUNCTIONS '''
 
@@ -44,7 +51,7 @@ def i2c_write_data(data, resp=True):
 
 ''' MAIN PROGRAM '''
 if __name__ == '__main__':
-    
+    ''' Set Up Bucks ajj'''
     i2c = I2C(port, speed)
  
     print "Entering binmode: ",
