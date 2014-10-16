@@ -12,7 +12,8 @@ from I2C import *
 from Digital_Potentiometer import *
 
 ''' SCRIPT PARAMETERS '''
-port = "/dev/tty.usbserial-A1017JW6"
+#port = "/dev/tty.usbserial-A1017JW6"
+port = "/dev/ttyUSB0"
 speed = 115200
 
 R_base = 200E3
@@ -39,7 +40,7 @@ def i2c_write_data(data, resp=True):
         status = i2c.bulk_trans(1, [i])
         if(resp):
             if status.find(chr(0x01)) != -1:
- 
+
                 error = 1
     i2c.send_stop_bit()
     print [hex(x) for x in data]
@@ -55,28 +56,28 @@ def i2c_write_data(data, resp=True):
 
 ''' MAIN PROGRAM '''
 if __name__ == '__main__':
-    
-    
+
+
     ''' Set up DMMs '''
     # setup freq gen
     freq.setSquare()
     freq.setVoltage(0,3)
     freq.setFrequency(sampleFreq)
-    
+
     # setup resistance meter
     resist_meter.setResistance("AUTO", "MAX")
     resist_meter.setTriggerSource()
     resist_meter.setTriggerCount(totalSamples)
     resist_meter.setInitiate()
-    
+
     time.sleep(1)
-    
+
     freq.setOutput(1)
 
-    
+
     ''' Set up bus pirate '''
     i2c = I2C(port, speed)
- 
+
     print "Entering binmode: ",
     if i2c.BBmode():
         print "OK."
@@ -90,7 +91,7 @@ if __name__ == '__main__':
         else:
             print "failed. again..."
         sys.exit()
-        
+
     print "Entering raw I2C mode: ",
     if i2c.enter_I2C():
         print "OK."
@@ -107,24 +108,30 @@ if __name__ == '__main__':
         print "Failed to set I2C Speed."
         sys.exit()
     i2c.timeout(0.2)
-    
-    input("Press Enter to continue...")
-    
+
+
     ''' Experiment Code '''
     print "Loop Through Pot Values"
     for ii in range(0,256):
         i2c_write_data(R1.I2C_set_value(ii))
-        r_meas = resist_meter.getMeasurements()
+        time.sleep(0.0001)
+        r_meas_meter = resist_meter.getMeasurements()
+        r_meas = np.mean(r_meas_meter[-5:])
         r_ideal = ii*R_base/255
+        r_tmp = [ii, r_ideal, r_meas]
+        print r_tmp
         if ii == 0:
-            r_data = np.array([[ii, r_ideal, r_meas]])
+            #r_data = np.array([ii, r_ideal, r_meas])
+            r_data = np.array([r_tmp])
         else:
-            r_data = np.append(r_data, [[ii, r_ideal, r_meas]], 0)
-        
-        print "[%03d %8.2f %8.2f]" % [ii, r_ideal, r_meas]
-        time.sleep(0.005) # sleep for 5ms
+            #r_data = np.append(r_data, [ii, r_ideal, r_meas], 0)
+            r_data = np.append(r_data,[r_tmp], 0)
 
-    np.savetxt("Dig_pot_range_test.csv", r_data, delimiter=',')
+        #print "[%03d %8.2f %8.2f]" % [ii, r_ideal, r_meas]
+        #print r_data
+
+    print r_data
+    np.savetxt("Dig_pot_range_test.csv", r_data, delimiter=',', fmt='%.2f')
 #     i2c_write_data(R1.I2C_set_value(20))
 
 #     input("Press Enter to continue...")
@@ -135,7 +142,7 @@ if __name__ == '__main__':
     else:
         print "failed."
     sys.exit()
-    
-    
-    
-    
+
+
+
+
