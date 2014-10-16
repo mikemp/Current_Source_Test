@@ -16,9 +16,10 @@ from Digital_Potentiometer import *
 port = "/dev/ttyUSB0"
 speed = 115200
 
-R_base = 200E3
-R1 = Digital_Potentiometer(0,0,0)
-R2 = Digital_Potentiometer(0,0,1)
+save_file_name = "Data/200k_pot_range_test.csv"
+
+R1 = Digital_Potentiometer(0,0,0,200e3)
+R2 = Digital_Potentiometer(0,0,1,200e3)
 
 totalSamples = "INF"
 sampleFreq = 100000
@@ -30,8 +31,6 @@ resist_meter = SCPI.SCPI("192.168.2.2")
 
 
 ''' UTILITY FUNCTIONS '''
-
-
 def i2c_write_data(data, resp=True):
     error = 0
     addr = data[0]
@@ -56,7 +55,6 @@ def i2c_write_data(data, resp=True):
 
 ''' MAIN PROGRAM '''
 if __name__ == '__main__':
-
 
     ''' Set up DMMs '''
     # setup freq gen
@@ -117,25 +115,20 @@ if __name__ == '__main__':
         time.sleep(0.0001)
         r_meas_meter = resist_meter.getMeasurements()
         r_meas = np.mean(r_meas_meter[-5:])
-        r_ideal = ii*R_base/255
+        r_ideal = R1.get_ideal_value()
         r_tmp = [ii, r_ideal, r_meas]
         print r_tmp
         if ii == 0:
-            #r_data = np.array([ii, r_ideal, r_meas])
             r_data = np.array([r_tmp])
         else:
-            #r_data = np.append(r_data, [ii, r_ideal, r_meas], 0)
             r_data = np.append(r_data,[r_tmp], 0)
 
-        #print "[%03d %8.2f %8.2f]" % [ii, r_ideal, r_meas]
-        #print r_data
-
     print r_data
-    np.savetxt("Dig_pot_range_test.csv", r_data, delimiter=',', fmt='%.2f')
-#     i2c_write_data(R1.I2C_set_value(20))
+    np.savetxt(save_file_name, r_data, delimiter=',', fmt='%.2f')
 
 #     input("Press Enter to continue...")
 
+    ''' Experiment Done Reset Bus Pirate '''
     print "Reset Bus Pirate to user terminal: "
     if i2c.resetBP():
         print "OK."
