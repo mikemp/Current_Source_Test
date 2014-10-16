@@ -23,7 +23,7 @@ from Digital_Potentiometer import *
 port = "/dev/ttyUSB0"
 speed = 115200
 
-save_file_name = "Data/pot_range_test_200k.csv"
+save_file_name = "pot_range_test_200k.csv"
 
 R1 = Digital_Potentiometer(0,0,0,200e3)
 R2 = Digital_Potentiometer(0,0,1,200e3)
@@ -75,14 +75,14 @@ if __name__ == '__main__':
     resist_meter1.setTriggerSource()
     resist_meter1.setTriggerCount(totalSamples)
     resist_meter1.setInitiate()
-    
-    # setup resistance meter 2
-    resist_meter1.setResistance("AUTO", "MAX")
-    resist_meter1.setTriggerSource()
-    resist_meter1.setTriggerCount(totalSamples)
-    resist_meter1.setInitiate()
 
-    time.sleep(1)
+    # setup resistance meter 2
+    resist_meter2.setResistance("AUTO", "MAX")
+    resist_meter2.setTriggerSource()
+    resist_meter2.setTriggerCount(totalSamples)
+    resist_meter2.setInitiate()
+
+    #time.sleep(1)
 
     freq.setOutput(1)
 
@@ -127,7 +127,7 @@ if __name__ == '__main__':
     for ii in range(0,256):
         i2c_write_data(R1.I2C_set_value(ii))
         i2c_write_data(R2.I2C_set_value(ii))
-        time.sleep(0.0001)
+        #time.sleep(0.0001)
         r_meas_meter1 = resist_meter1.getMeasurements()
         r_meas_meter2 = resist_meter2.getMeasurements()
         r_meas1 = np.mean(r_meas_meter1[-5:])

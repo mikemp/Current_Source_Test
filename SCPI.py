@@ -22,7 +22,7 @@ class SCPI:
     def setSquare(self):
         # square function
         self.s.send("FUNCtion SQUare\n")
-        
+
     def setSin(self):
         # sine function
         self.s.send("FUNCtion SIN\n")
@@ -66,13 +66,16 @@ class SCPI:
         else:
             self.s.send("CONF:VOLT:DC %s,%s\n" % (limit, precision))
         self.s.send("FORMAT REAL, 64\n")
-        
+
     def setResistance(self, limit="AUTO", precision=""):
         if precision == "":
             self.s.send("CONF:RES AUTO\n")
         else:
             self.s.send("CONF:RES %s,%s\n" % (limit, precision))
         self.s.send("FORMAT REAL, 64\n")
+
+    def setAutoInputImpedance(self, auto="OFF"):
+        self.s.send("INP:IMP:AUTO %s\n" % (auto,))
 
     def setTriggerSource(self, source="EXT"):
         self.s.send("TRIGGER:SOURCE %s\n" % (source,))
@@ -92,18 +95,18 @@ class SCPI:
         # read the number of digits that follow
         l = int(self.s.recv(1))
         length = int(self.s.recv(l))
-        
+
         l = 0
         r = ""
         while l < int(length):
             c = self.s.recv(int(length) - l)
             l += len(c)
             r += c
-        
+
         # read the newline character
         self.s.recv(1)
-        
+
         m = struct.unpack(">%dd" % (int(length) / 8,), r)
-        
+
         return m
 

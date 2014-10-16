@@ -23,7 +23,7 @@ from Digital_Potentiometer import *
 port = "/dev/ttyUSB0"
 speed = 115200
 
-save_file_name = "Data/pot_range_test_1meg.csv"
+save_file_name = "pot_range_test_1meg.csv"
 
 R1 = Digital_Potentiometer(0,0,0,1e6)
 
@@ -69,7 +69,8 @@ if __name__ == '__main__':
     freq.setFrequency(sampleFreq)
 
     # setup resistance meter
-    resist_meter.setResistance("AUTO", "MAX")
+    resist_meter.setResistance("10000000", "MAX")
+    #resist_meter.setAutoInputImpedance("ON")
     resist_meter.setTriggerSource()
     resist_meter.setTriggerCount(totalSamples)
     resist_meter.setInitiate()
@@ -141,7 +142,5 @@ if __name__ == '__main__':
     else:
         print "failed."
     sys.exit()
-
-
 
 
