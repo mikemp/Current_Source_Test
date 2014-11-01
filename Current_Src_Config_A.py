@@ -59,9 +59,14 @@ def i2c_write_data(data, resp=True):
         else:
             print "failed."
         sys.exit()
-        
-def r_par_eq(R1A,R1B):
-    return R1A*R1B/(R1A+R1B)
+
+def r_par_eq(R1,R2):
+    a = float(R1)
+    b = float(R2)
+    if a*b == 0:
+        return 0
+    else:
+        return a*b/(a+b)
 
 ''' MAIN PROGRAM '''
 if __name__ == '__main__':
@@ -84,7 +89,7 @@ if __name__ == '__main__':
     voltage.setTriggerSource()
     voltage.setTriggerCount(totalSamples)
     voltage.setInitiate()
-    
+
 #     #setup current meter
 #     current.setCurrentDC("1A", "MAX")
 #     current.setTriggerSource()
@@ -136,7 +141,7 @@ if __name__ == '__main__':
     i2c_write_data(R2A.shutdown())
     i2c_write_data(R2B.shutdown())
     i2c_write_data(R3A.shutdown())
-    
+
     print "Loop Through Pot Values"
     #for ii in range(0,256):
     for ii in range(255,-1,-1): # reversed
@@ -145,26 +150,27 @@ if __name__ == '__main__':
         # set pots to the same value
         i2c_write_data(R1A.I2C_set_value(ii))
         i2c_write_data(R1B.I2C_set_value(ii))
-        
+
         # wait for transient response
         time.sleep(0.001)
-        
+
         # record DMM voltages as transient response
-        trans_resp = voltage.getMeasurements(); 
+        trans_resp = voltage.getMeasurements();
         steady_state = np.mean(trans_resp[-5:])
-        
+
         # save transient response into file
         sample_base = range(0,len(trans_resp))
         time_base = [float(x)/float(sampleFreq) for x in sample_base]
-        trans_data = np.array(sample_base,time_base,trans_resp)
+        trans_data = np.array([sample_base,time_base,trans_resp]).T
         trial = "%04d" % (ii)
         np.savetxt("%s_%s.%s" % (save_file_trans,trial,ext), trans_data, delimiter=',', fmt='%.6f')
-        
+
         # record steady state into array
         r_ideal = r_par_eq(R1A.get_ideal_value(),R1B.get_ideal_value())
         r_tmp = [ii, r_ideal, steady_state]
         print r_tmp
-        if ii == 0:
+        #if ii == 0:
+        if ii == 255:
             steady_data = np.array([r_tmp])
         else:
             steady_data = np.append(steady_data,[r_tmp], 0)
