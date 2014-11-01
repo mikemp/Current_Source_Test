@@ -18,12 +18,15 @@ from Digital_Potentiometer import *
 port = "/dev/ttyUSB0"
 speed = 115200
 
-save_file_trans = "current_src_trans"
-save_file_steady = "current_src_steady"
+save_file_trans = "current_src_confA_trans"
+save_file_steady = "current_src_confA_steady"
 ext = "csv"
 
-R1 = Digital_Potentiometer(0,0,0,200e3)
-R2 = Digital_Potentiometer(0,0,1,200e3)
+R1A = Digital_Potentiometer(0,0,0,200e3)
+R1B = Digital_Potentiometer(0,0,1,200e3)
+R2A = Digital_Potentiometer(1,0,0,200e3)
+R2B = Digital_Potentiometer(1,0,1,200e3)
+R3A = Digital_Potentiometer(1,1,0,1e6)
 
 totalSamples = "INF"
 sampleFreq = 100000
@@ -57,8 +60,8 @@ def i2c_write_data(data, resp=True):
             print "failed."
         sys.exit()
         
-def r_par_eq(R1,R2):
-    return R1*R2/(R1+R2)
+def r_par_eq(R1A,R1B):
+    return R1A*R1B/(R1A+R1B)
 
 ''' MAIN PROGRAM '''
 if __name__ == '__main__':
@@ -129,14 +132,19 @@ if __name__ == '__main__':
 
 
     ''' Experiment Code '''
+    # Shutdown R2 and R3
+    i2c_write_data(R2A.shutdown())
+    i2c_write_data(R2B.shutdown())
+    i2c_write_data(R3A.shutdown())
+    
     print "Loop Through Pot Values"
     #for ii in range(0,256):
     for ii in range(255,-1,-1): # reversed
         # clear DMM measurements
         meas_dump = voltage.getMeasurements()
         # set pots to the same value
-        i2c_write_data(R1.I2C_set_value(ii))
-        i2c_write_data(R2.I2C_set_value(ii))
+        i2c_write_data(R1A.I2C_set_value(ii))
+        i2c_write_data(R1B.I2C_set_value(ii))
         
         # wait for transient response
         time.sleep(0.001)
@@ -153,7 +161,7 @@ if __name__ == '__main__':
         np.savetxt("%s_%s.%s" % (save_file_trans,trial,ext), trans_data, delimiter=',', fmt='%.6f')
         
         # record steady state into array
-        r_ideal = r_par_eq(R1.get_ideal_value(),R2.get_ideal_value())
+        r_ideal = r_par_eq(R1A.get_ideal_value(),R1B.get_ideal_value())
         r_tmp = [ii, r_ideal, steady_state]
         print r_tmp
         if ii == 0:

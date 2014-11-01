@@ -46,7 +46,7 @@ while 1:
     for i in range(l):
         print j, float(j)/float(sampleFreq), currentMeasurements[i], voltageMeasurements[i]
         j += 1
-    currentMeasurements = currentMeasurements[l:-1]
+    currentMeasurements = currentMeasurements[l-1]
     voltageMeasurements = voltageMeasurements[l:-1]
 
     sys.stdout.flush()

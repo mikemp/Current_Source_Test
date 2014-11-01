@@ -55,8 +55,8 @@ class Digital_Potentiometer:
 #         return hex(int(address,2))
         return int(address,2)
 
-    def get_instruction_byte(self):
-        instruction = '%d0000000' % (self.register_bit)
+    def get_instruction_byte(self,sd=0):
+        instruction = '%d0%d00000' % (self.register_bit,sd)
 #         return "0x{:02x}".format(int(instruction, 2))
 #         return hex(int(instruction, 2))
         return int(instruction, 2)
@@ -72,5 +72,8 @@ class Digital_Potentiometer:
     def I2C_set_value(self, pos):
         self.set_wiper_position(pos)
         return self.get_I2C_write_command()
+    
+    def shutdown(self):
+        return [self.get_address_byte(0),self.get_instruction_byte(sd=1),0]
 
 

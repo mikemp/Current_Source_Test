@@ -25,8 +25,8 @@ speed = 115200
 
 save_file_name = "pot_range_test_200k.csv"
 
-R1 = Digital_Potentiometer(0,0,0,200e3)
-R2 = Digital_Potentiometer(0,0,1,200e3)
+R1A = Digital_Potentiometer(0,0,0,200e3)
+R1B = Digital_Potentiometer(0,0,1,200e3)
 
 totalSamples = "INF"
 sampleFreq = 100000
@@ -125,14 +125,14 @@ if __name__ == '__main__':
     ''' Experiment Code '''
     print "Loop Through Pot Values"
     for ii in range(0,256):
-        i2c_write_data(R1.I2C_set_value(ii))
-        i2c_write_data(R2.I2C_set_value(ii))
+        i2c_write_data(R1A.I2C_set_value(ii))
+        i2c_write_data(R1B.I2C_set_value(ii))
         #time.sleep(0.0001)
         r_meas_meter1 = resist_meter1.getMeasurements()
         r_meas_meter2 = resist_meter2.getMeasurements()
         r_meas1 = np.mean(r_meas_meter1[-5:])
         r_meas2 = np.mean(r_meas_meter2[-5:])
-        r_ideal = R1.get_ideal_value()
+        r_ideal = R1A.get_ideal_value()
         r_tmp = [ii, r_ideal, r_meas1, r_meas2]
         print r_tmp
         if ii == 0:
