@@ -1,9 +1,9 @@
 set term postscript enhanced eps color font "Helvetica,18" size 4in,2.5in
 
 #set output
-filename = "pot_range_test_200k"
+filename = "pot_range_test_1meg"
 
-set output filename.".eps"
+set output filename."_var.eps"
 set border 11 lw 2
 set ytics nomirror
 set xtics nomirror
@@ -11,11 +11,12 @@ set xtics nomirror
 #set lmargin 11
 #set rmargin 12
 #set bmargin 10 
-set xlabel "Values"
+set xlabel "Wiper Position"
 set ylabel "Resistance (ohms)"
 
 #set yrange [2.5e0:1e2]
-set xrange[:256]
+#set xrange[:256]
+set xrange[1:256]
 #set grid
 #set log y
 
@@ -31,8 +32,7 @@ set key bottom center font "Helvetica, 16"
 set datafile separator ","
 #start_pt=10000
 #duration=110000
-plot	filename.".csv" using 1:2 title "Ideal" with lines ls 1 lc 1 lw 2, \
-        filename.".csv" using 1:3 title "Pot A" with lines ls 1 lc 4 lw 2, \
-        filename.".csv" using 1:4 title "Pot B" with lines ls 1 lc 3 lw 2
+plot	filename.".csv" using 1:($3-$2) title "Variance" with lines ls 1 lc 1 lw 2, \
+
 
 #replot;

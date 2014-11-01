@@ -136,12 +136,12 @@ if __name__ == '__main__':
         r_tmp = [ii, r_ideal, r_meas1, r_meas2]
         print r_tmp
         if ii == 0:
-            r_data = np.array([r_tmp])
+            steady_data = np.array([r_tmp])
         else:
-            r_data = np.append(r_data,[r_tmp], 0)
+            steady_data = np.append(steady_data,[r_tmp], 0)
 
-    print r_data
-    np.savetxt(save_file_name, r_data, delimiter=',', fmt='%.2f')
+    print steady_data
+    np.savetxt(save_file_name, steady_data, delimiter=',', fmt='%.2f')
 
 #     input("Press Enter to continue...")
 

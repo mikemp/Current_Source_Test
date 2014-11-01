@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # encoding: utf-8
 '''
-CurrentSourceI2C.py
-Created on Oct 7, 2014
+Current Src Breakout Test
+Note: A 0x00 position for the pots is the Max
+
+Created on Nov 1, 2014
 @author: Michael Empey
 '''
 
@@ -16,7 +18,9 @@ from Digital_Potentiometer import *
 port = "/dev/ttyUSB0"
 speed = 115200
 
-save_file_name = "Data/200k_pot_range_test.csv"
+save_file_trans = "current_src_trans"
+save_file_steady = "current_src_steady"
+ext = "csv"
 
 R1 = Digital_Potentiometer(0,0,0,200e3)
 R2 = Digital_Potentiometer(0,0,1,200e3)
@@ -25,8 +29,8 @@ totalSamples = "INF"
 sampleFreq = 100000
 
 freq    = SCPI.SCPI("192.168.2.1")
-resist_meter = SCPI.SCPI("192.168.2.2")
-# voltage = SCPI.SCPI("192.168.2.2")
+# resist_meter = SCPI.SCPI("192.168.2.2")
+voltage = SCPI.SCPI("192.168.2.2")
 # current = SCPI.SCPI("192.168.2.3")
 
 
@@ -52,6 +56,9 @@ def i2c_write_data(data, resp=True):
         else:
             print "failed."
         sys.exit()
+        
+def r_par_eq(R1,R2):
+    return R1*R2/(R1+R2)
 
 ''' MAIN PROGRAM '''
 if __name__ == '__main__':
@@ -62,11 +69,24 @@ if __name__ == '__main__':
     freq.setVoltage(0,3)
     freq.setFrequency(sampleFreq)
 
-    # setup resistance meter
-    resist_meter.setResistance("AUTO", "MAX")
-    resist_meter.setTriggerSource()
-    resist_meter.setTriggerCount(totalSamples)
-    resist_meter.setInitiate()
+#     # setup resistance meter
+#     resist_meter.setResistance("10000000", "MAX")
+#     #resist_meter.setAutoInputImpedance("ON")
+#     resist_meter.setTriggerSource()
+#     resist_meter.setTriggerCount(totalSamples)
+#     resist_meter.setInitiate()
+
+    #setup voltage meter
+    voltage.setVoltageDC("10V", "MAX")
+    voltage.setTriggerSource()
+    voltage.setTriggerCount(totalSamples)
+    voltage.setInitiate()
+    
+#     #setup current meter
+#     current.setCurrentDC("1A", "MAX")
+#     current.setTriggerSource()
+#     current.setTriggerCount(totalSamples)
+#     current.setInitiate()
 
     time.sleep(1)
 
@@ -110,21 +130,39 @@ if __name__ == '__main__':
 
     ''' Experiment Code '''
     print "Loop Through Pot Values"
-    for ii in range(0,256):
+    #for ii in range(0,256):
+    for ii in range(255,-1,-1): # reversed
+        # clear DMM measurements
+        meas_dump = voltage.getMeasurements()
+        # set pots to the same value
         i2c_write_data(R1.I2C_set_value(ii))
-        time.sleep(0.0001)
-        r_meas_meter = resist_meter.getMeasurements()
-        r_meas = np.mean(r_meas_meter[-5:])
-        r_ideal = R1.get_ideal_value()
-        r_tmp = [ii, r_ideal, r_meas]
+        i2c_write_data(R2.I2C_set_value(ii))
+        
+        # wait for transient response
+        time.sleep(0.001)
+        
+        # record DMM voltages as transient response
+        trans_resp = voltage.getMeasurements(); 
+        steady_state = np.mean(trans_resp[-5:])
+        
+        # save transient response into file
+        sample_base = range(0,len(trans_resp))
+        time_base = [float(x)/float(sampleFreq) for x in sample_base]
+        trans_data = np.array(sample_base,time_base,trans_resp)
+        trial = "%04d" % (ii)
+        np.savetxt("%s_%s.%s" % (save_file_trans,trial,ext), trans_data, delimiter=',', fmt='%.6f')
+        
+        # record steady state into array
+        r_ideal = r_par_eq(R1.get_ideal_value(),R2.get_ideal_value())
+        r_tmp = [ii, r_ideal, steady_state]
         print r_tmp
         if ii == 0:
             steady_data = np.array([r_tmp])
         else:
             steady_data = np.append(steady_data,[r_tmp], 0)
 
-    print steady_data
-    np.savetxt(save_file_name, steady_data, delimiter=',', fmt='%.2f')
+#     print steady_data
+    np.savetxt("%s.%s" % (save_file_steady,ext), steady_data, delimiter=',', fmt='%.6f')
 
 #     input("Press Enter to continue...")
 
@@ -135,7 +173,5 @@ if __name__ == '__main__':
     else:
         print "failed."
     sys.exit()
-
-
 
 
