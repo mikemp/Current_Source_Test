@@ -2,6 +2,7 @@ eclipse.preferences.version=1
 encoding/BitBang.py=utf-8
 encoding/CurrentSourceI2C.py=utf-8
 encoding/Current_Src_Config_A.py=utf-8
+encoding/Current_Src_Config_B.py=utf-8
 encoding/Digital_Pot_Test_1Meg.py=utf-8
 encoding/Digital_Pot_Test_200k.py=utf-8
 encoding/I2C.py=utf-8
