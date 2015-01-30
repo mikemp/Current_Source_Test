@@ -13,7 +13,7 @@ import sys, SCPI, time
 import numpy as np
 from I2C import *
 from Digital_Potentiometer import *
-from Digital_Pot_Group import Digital_Pot_Group
+from Digital_Pot_Group import *
 
 ''' SCRIPT PARAMETERS '''
 #port = "/dev/tty.usbserial-A1017JW6"
@@ -75,7 +75,8 @@ def i2c_write_data(data, resp=True, display=False):
         sys.exit()
 
 def i2c_group_write_data(pot_group, resp=True, display=False):
-    for pot in pot_group.get_pots():
+    pot_array = pot_group.get_pots()
+    for pot in pot_array:
         i2c_write_data(pot.I2C_set_command(), resp, display)
 
 def r_par_eq(R1,R2):
@@ -157,40 +158,40 @@ if __name__ == '__main__':
     ''' Experiment Code '''
     i2c_group_write_data(RG1.set_pos_to_min())
     i2c_group_write_data(RG2.set_pos_to_max())
-
     ii = -1
     print "Loop Through Pot Values"
     while RG1.can_increment() and RG2.can_decrement():
         ii += 1
+
         # increment RG1 and decrement RG2
         RG1.increment()
         RG2.decrement()
-        
+
         # clear DMM measurements
         meas_dump = voltage.getMeasurements()
-        
+
         # send new positions to pots
         i2c_group_write_data(RG1)
         i2c_group_write_data(RG2)
-        
+
         # wait for transient response
-        time.sleep(0.001)
-        
+        # time.sleep(0.0005)
+
         # record DMM voltages as transient response
         trans_resp = voltage.getMeasurements();
         steady_state = np.mean(trans_resp[-5:])
-        
+
         # save transient response into file
         sample_base = range(0,len(trans_resp))
         time_base = [float(x)/float(sampleFreq) for x in sample_base]
         trans_data = np.array([sample_base,time_base,trans_resp]).T
         trial = "%04d" % (ii)
         np.savetxt("%s_%s.%s" % (save_file_trans,trial,ext), trans_data, delimiter=',', fmt='%.6f')
-        
+
         # record steady state into array
         r_tmp = [ii, RG1.get_ideal_value(), RG2.get_ideal_value(), steady_state]
         print r_tmp
-        
+
         if ii == 0:
             steady_data = np.array([r_tmp])
         else:
