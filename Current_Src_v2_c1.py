@@ -21,7 +21,7 @@ port = "/dev/ttyUSB0"
 speed = 115200
 
 save_file_trans = "current_src_confA_trans"
-save_file_steady = "current_src_confA_steady"
+save_file_steady = "current_src_v2_conf1_steady"
 ext = "csv"
 
 R1 = Digital_Potentiometer(0, 0, 0, 0, 1E3)
@@ -168,7 +168,8 @@ if __name__ == '__main__':
         RG2.decrement()
 
         # clear DMM measurements
-        meas_dump = voltage.getMeasurements()
+        voltage.getMeasurements()
+        current.getMeasurements()
 
         # send new positions to pots
         i2c_group_write_data(RG1)
@@ -178,18 +179,21 @@ if __name__ == '__main__':
         # time.sleep(0.0005)
 
         # record DMM voltages as transient response
-        trans_resp = voltage.getMeasurements();
-        steady_state = np.mean(trans_resp[-5:])
+        trans_resp_volt = voltage.getMeasurements()
+        steady_state_volt = np.mean(trans_resp_volt[-20:])
+        
+        trans_resp_curr = current.getMeasurements()
+        steady_state_curr = np.mean(trans_resp_curr[-20:])
 
-        # save transient response into file
-        sample_base = range(0,len(trans_resp))
-        time_base = [float(x)/float(sampleFreq) for x in sample_base]
-        trans_data = np.array([sample_base,time_base,trans_resp]).T
-        trial = "%04d" % (ii)
-        np.savetxt("%s_%s.%s" % (save_file_trans,trial,ext), trans_data, delimiter=',', fmt='%.6f')
+#         # save transient response into file
+#         sample_base = range(0,len(trans_resp))
+#         time_base = [float(x)/float(sampleFreq) for x in sample_base]
+#         trans_data = np.array([sample_base,time_base,trans_resp]).T
+#         trial = "%04d" % (ii)
+#         np.savetxt("%s_%s.%s" % (save_file_trans,trial,ext), trans_data, delimiter=',', fmt='%.6f')
 
         # record steady state into array
-        r_tmp = [ii, RG1.get_ideal_value(), RG2.get_ideal_value(), steady_state]
+        r_tmp = [ii, RG1.get_ideal_value(), RG2.get_ideal_value(), steady_state_curr, steady_state_volt]
         print r_tmp
 
         if ii == 0:
