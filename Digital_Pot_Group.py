@@ -30,7 +30,7 @@ class Digital_Pot_Group:
     def set_wiper_pos(self,pos):
         set_remain = (pos-self.num_pots)%(self.num_pos-self.num_pots)
         num_pots_full = (pos-self.num_pots)/(self.num_pos-self.num_pots)
-        # print [num_pots_full, set_remain]
+        print [pos, num_pots_full, set_remain]
         # print [self.num_pots, self.total_positions, pos]
         # print [pos <= self.total_positions, pos > self.num_pots]
         if pos <= self.total_positions and pos > self.num_pots:
@@ -42,7 +42,8 @@ class Digital_Pot_Group:
             if num_pots_full < self.num_pots:
                 for ii in range(num_pots_full,self.num_pots-1):
                     self.variable_R_array[ii].set_wiper_pos(1)
-                self.variable_R_array[num_pots_full-1].set_wiper_pos(set_remain)
+                if set_remain > 0:
+                    self.variable_R_array[num_pots_full-1].set_wiper_pos(set_remain)
 
 
         elif pos == self.num_pots:

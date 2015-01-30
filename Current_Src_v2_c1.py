@@ -181,7 +181,7 @@ if __name__ == '__main__':
         # record DMM voltages as transient response
         trans_resp_volt = voltage.getMeasurements()
         steady_state_volt = np.mean(trans_resp_volt[-20:])
-        
+
         trans_resp_curr = current.getMeasurements()
         steady_state_curr = np.mean(trans_resp_curr[-20:])
 
