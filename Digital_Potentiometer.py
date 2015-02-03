@@ -51,7 +51,7 @@ class Digital_Potentiometer:
             return self.wiper_pos*self.size/(self.total_num_of_positions-1)
 
     def get_address_byte(self,W_R):
-        address = '01011%d%d%d' % (self.address_bit1,self.address_bit1,W_R)
+        address = '01011%d%d%d' % (self.address_bit1,self.address_bit0,W_R)
         return int(address,2)
 
     def get_instruction_byte(self,CMD_REG=0,EE_RDAC=0):
