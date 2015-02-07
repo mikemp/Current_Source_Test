@@ -80,6 +80,8 @@ class Digital_Pot_Group:
             sum += R.get_ideal_value()
         return sum
 
+    def iterator(self):
+        return range(self.get_min_position(),self.get_max_position()-self.get_min_position()+1)
 
     def can_increment(self):
         return self.group_wiper_pos < self.group_max_pos

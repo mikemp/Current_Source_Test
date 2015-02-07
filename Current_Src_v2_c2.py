@@ -58,9 +58,18 @@ def print_i2c(data):
 
 def i2c_group_write_data(pot_group, resp=True, display=True):
     pot_array = pot_group.get_pots()
+    if display == True:
+        i2c_group_print_data(pot_group)
     for pot in pot_array:
-        i2c_write_data(pot.I2C_set_command(), resp, display)
-    
+        i2c_write_data(pot.I2C_set_command(), resp, display=False)
+
+def i2c_group_print_data(pot_group):
+    pot_array = pot_group.get_pots()
+    ic2_command = []
+    for pot in pot_array:
+        ic2_command.append([hex(x) for x in pot.I2C_set_command()])
+    print ic2_command
+
 def i2c_write_data(data, resp=True, display=True):
     error = 0
     addr = data[0]
@@ -171,38 +180,33 @@ if __name__ == '__main__':
     i2c.timeout(0.2)
 
     # Initalize Potentiometers for Test
-    i2c_group_write_data(RG1.set_pos_to_min())
     i2c_group_write_data(RG2.set_pos_to_min())
-
+    
     ''' Experiment Code '''
-    i2c_group_write_data()
-    i2c_group_write_data()
-    ii = 0
     print "Loop Through Pot Values"
-    while RG2.can_increment():
+    for ii in RG2.iterator():
  
         # clear DMM measurements
         voltage.getMeasurements()
         current.getMeasurements()
  
         # send new positions to pots
-        i2c_group_write_data(RG1)
-        i2c_group_write_data(RG2)
+        i2c_group_write_data(RG2,display=False)
  
         # wait for transient response
         time.sleep(0.0005)
  
         # record DMM voltages as transient response
         trans_resp_volt = voltage.getMeasurements()
-        steady_state_volt = np.mean(trans_resp_volt[-20:])
+        steady_state_volt = np.mean(trans_resp_volt[-5:])
  
         trans_resp_curr = current.getMeasurements()
-        steady_state_curr = np.mean(trans_resp_curr[-20:])
+        steady_state_curr = np.mean(trans_resp_curr[-5:])
  
         # save transient response into file
         save_transient(trans_resp_volt,'current_src_v2_c2_volt_trans',ii)
         save_transient(trans_resp_curr,'current_src_v2_c2_curr_trans',ii)
-        save_transient(trans_resp_curr*trans_resp_volt,'current_src_v2_c2_power_trans',ii)
+        #save_transient(trans_resp_curr*trans_resp_volt,'current_src_v2_c2_power_trans',ii)
  
         # record steady state into array
         r_tmp = [ii, RG1.get_ideal_value(), RG2.get_ideal_value(), steady_state_curr, steady_state_volt]

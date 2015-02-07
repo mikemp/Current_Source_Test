@@ -42,6 +42,9 @@ R12 = Digital_Potentiometer(1, 1, 1, 1, 1E3)
 RG1 = Digital_Pot_Group([R1,R2,R3,R4])
 RG2 = Digital_Pot_Group([R5,R6,R7,R8])
 
+# RG3 = Digital_Pot_Group()
+# RG4 = Digital_Pot_Group
+
 totalSamples = "INF"
 sampleFreq = 100000
 
