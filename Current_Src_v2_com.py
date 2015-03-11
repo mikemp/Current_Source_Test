@@ -165,7 +165,7 @@ if __name__ == '__main__':
     print "Loop Through Pot Values"
     while RG1.can_increment() and RG2.can_decrement():
         ii += 1
-
+ 
         # increment RG1 and decrement RG2
         RG1.increment()
         RG2.decrement()
