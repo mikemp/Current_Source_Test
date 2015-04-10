@@ -1,8 +1,13 @@
 eclipse.preferences.version=1
-encoding/BitBang.py=utf-8
+encoding//BinaryMode/BitBang.py=utf-8
+encoding//pyBusPirate-master/pyBusPirate/BinaryMode/BitBang.py=utf-8
+encoding//pyBusPirate-master/pyBusPirate/BinaryMode/SPI.py=utf-8
+encoding//pyBusPirate-master/spi_test_binmode.py=utf-8
+encoding//test_rev_02/Current_Src_v2_c1.py=utf-8
+encoding//test_rev_02/Current_Src_v3_c2.py=utf-8
+encoding/BP_SPI.py=utf-8
 encoding/CurrentSourceI2C.py=utf-8
 encoding/Current_Src_Config_A.py=utf-8
 encoding/Current_Src_Config_B.py=utf-8
 encoding/Digital_Pot_Test_1Meg.py=utf-8
 encoding/Digital_Pot_Test_200k.py=utf-8
-encoding/I2C.py=utf-8
